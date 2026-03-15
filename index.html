@@ -618,6 +618,10 @@
           statusPill.style.borderColor = "rgba(248,113,113,0.6)";
           statusPill.style.color = "#f97316";
           appendLog("session sealed to this device", true);
+          // after the creepy overlay, drop them into the local wiki page
+          setTimeout(function () {
+            window.location.href = "wiki.html";
+          }, 2600);
         }
 
         function handleCommand(cmd) {

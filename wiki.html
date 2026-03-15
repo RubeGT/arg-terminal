@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Shadow Memory Library</title>
+    <style>
+      :root {
+        --bg: #f5f5f7;
+        --bg-card: #ffffff;
+        --border: #e5e7eb;
+        --text: #111827;
+        --muted: #6b7280;
+        --accent: #2563eb;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+        background: var(--bg);
+        color: var(--text);
+      }
+
+      a {
+        color: var(--accent);
+        text-decoration: none;
+      }
+
+      a:hover {
+        text-decoration: underline;
+      }
+
+      .site-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0.75rem 5vw;
+        border-bottom: 1px solid var(--border);
+        background: linear-gradient(to bottom, #ffffff, #f9fafb);
+      }
+
+      .brand {
+        display: flex;
+        flex-direction: column;
+      }
+
+      .brand-title {
+        font-weight: 700;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        font-size: 0.85rem;
+      }
+
+      .brand-sub {
+        font-size: 0.7rem;
+        color: var(--muted);
+      }
+
+      .search {
+        max-width: 320px;
+        width: 100%;
+      }
+
+      .search input {
+        width: 100%;
+        padding: 0.45rem 0.75rem;
+        border-radius: 999px;
+        border: 1px solid var(--border);
+        font-size: 0.85rem;
+      }
+
+      .layout {
+        display: grid;
+        grid-template-columns: minmax(220px, 260px) minmax(0, 1fr);
+        gap: 1.5rem;
+        padding: 1.25rem 5vw 2.5rem;
+        max-width: 1100px;
+        margin: 0 auto;
+      }
+
+      .sidebar {
+        font-size: 0.9rem;
+      }
+
+      .sidebar-section + .sidebar-section {
+        margin-top: 1rem;
+      }
+
+      .sidebar-title {
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.14em;
+        color: var(--muted);
+        margin-bottom: 0.3rem;
+      }
+
+      .sidebar ul {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+      }
+
+      .sidebar li {
+        margin: 0.15rem 0;
+      }
+
+      .sidebar a {
+        display: block;
+        padding: 0.2rem 0.4rem;
+        border-radius: 999px;
+        color: var(--muted);
+      }
+
+      .sidebar a:hover {
+        background: #e5e7eb;
+        color: var(--text);
+      }
+
+      .content {
+        background: var(--bg-card);
+        border-radius: 12px;
+        border: 1px solid var(--border);
+        padding: 1.4rem 1.6rem;
+        box-shadow: 0 18px 40px rgba(15, 23, 42, 0.05);
+      }
+
+      .title {
+        margin-top: 0;
+        margin-bottom: 0.2rem;
+      }
+
+      .meta-line {
+        font-size: 0.8rem;
+        color: var(--muted);
+        margin-bottom: 1rem;
+      }
+
+      h2 {
+        font-size: 1.1rem;
+        margin-top: 1.3rem;
+        margin-bottom: 0.2rem;
+      }
+
+      p {
+        font-size: 0.93rem;
+        line-height: 1.6;
+        margin: 0.3rem 0;
+      }
+
+      .toc {
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 0.6rem 0.75rem;
+        background: #f9fafb;
+        margin-bottom: 1rem;
+      }
+
+      .toc-title {
+        font-size: 0.8rem;
+        font-weight: 600;
+        margin-bottom: 0.2rem;
+      }
+
+      .toc ol {
+        padding-left: 1.2rem;
+        margin: 0.1rem 0 0.3rem;
+        font-size: 0.86rem;
+      }
+
+      .notice {
+        font-size: 0.8rem;
+        color: var(--muted);
+        border-left: 3px solid #d1d5db;
+        padding-left: 0.6rem;
+        margin-bottom: 0.7rem;
+      }
+
+      .footer {
+        font-size: 0.75rem;
+        color: var(--muted);
+        margin-top: 1.5rem;
+        border-top: 1px solid #e5e7eb;
+        padding-top: 0.6rem;
+      }
+
+      @media (max-width: 720px) {
+        .layout {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="brand">
+        <span class="brand-title">SHADOW MEMORY LIBRARY</span>
+        <span class="brand-sub">an index of things that never happened</span>
+      </div>
+      <form class="search">
+        <input type="search" placeholder="Search phantom entries…" />
+      </form>
+    </header>
+
+    <main class="layout">
+      <aside class="sidebar">
+        <div class="sidebar-section">
+          <div class="sidebar-title">Main</div>
+          <ul>
+            <li><a href="wiki.html">Main page</a></li>
+            <li><a href="#">Random entry</a></li>
+            <li><a href="#">Recent echoes</a></li>
+          </ul>
+        </div>
+
+        <div class="sidebar-section">
+          <div class="sidebar-title">Categories</div>
+          <ul>
+            <li><a href="#">Anomalies</a></li>
+            <li><a href="#">Missing days</a></li>
+            <li><a href="#">Fictional cities</a></li>
+            <li><a href="#">Unreal people</a></li>
+          </ul>
+        </div>
+      </aside>
+
+      <article class="content">
+        <h1 class="title">Terminal Contact Event</h1>
+        <div class="meta-line">
+          From Shadow Memory Library, the collaborative archive of
+          never-recorded phenomena.
+        </div>
+
+        <div class="notice">
+          You reached this page by authenticating through an unlisted access
+          node. If you do not remember doing that, please do not reload.
+        </div>
+
+        <section class="toc">
+          <div class="toc-title">Contents</div>
+          <ol>
+            <li><a href="#overview">Overview</a></li>
+            <li><a href="#symptoms">Observed symptoms</a></li>
+            <li><a href="#spread">Propagation</a></li>
+            <li><a href="#notes">Editor notes</a></li>
+          </ol>
+        </section>
+
+        <h2 id="overview">Overview</h2>
+        <p>
+          The <strong>Terminal Contact Event</strong> refers to a recurring
+          pattern in which an observer interacts with a seemingly innocuous
+          command-line interface that responds as if it has been expecting
+          them.
+        </p>
+        <p>
+          Unlike standard authentication flows, the interface records not only
+          what is typed, but the hesitation before it: how long the cursor
+          waits, how often the user corrects themselves, whether they look away
+          from the screen.
+        </p>
+
+        <h2 id="symptoms">Observed symptoms</h2>
+        <p>Reported experiences include:</p>
+        <ul>
+          <li>Recognition of the user's device across fresh installs.</li>
+          <li>Log entries referring to actions the user considered but did not perform.</li>
+          <li>Interfaces that "welcome back" users with no recorded prior visit.</li>
+        </ul>
+
+        <h2 id="spread">Propagation</h2>
+        <p>
+          Terminal Contact Events do not appear in standard traffic logs. Copies
+          of the interface proliferate through personal projects, test
+          deployments, and forgotten subdomains. Each instance claims to be the
+          only one.
+        </p>
+
+        <h2 id="notes">Editor notes</h2>
+        <p>
+          This entry is a stub. Expand it by editing the local file
+          <code>wiki.html</code> in your deployment and redeploying. Additional
+          pages can be created by duplicating this file and updating the
+          navigation links.
+        </p>
+
+        <div class="footer">
+          Last modified: unknown. You are the first editor who will admit to
+          it.
+        </div>
+      </article>
+    </main>
+  </body>
+</html>
+
