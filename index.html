@@ -1,0 +1,676 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ACCESS NODE // TERMINAL</title>
+    <style>
+      :root {
+        --bg: #020617;
+        --accent: #22c55e;
+        --accent-soft: rgba(34, 197, 94, 0.18);
+        --danger: #f97316;
+        --text-dim: #78716c;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        height: 100%;
+        font-family: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo,
+          Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+        background: radial-gradient(circle at top, #020617 0, #000 55%);
+        color: #e5e7eb;
+      }
+
+      body {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+      }
+
+      .scanlines::before {
+        content: "";
+        position: fixed;
+        inset: 0;
+        background: repeating-linear-gradient(
+          to bottom,
+          rgba(0, 0, 0, 0.3) 0,
+          rgba(0, 0, 0, 0.3) 1px,
+          transparent 1px,
+          transparent 3px
+        );
+        mix-blend-mode: soft-light;
+        pointer-events: none;
+        z-index: 5;
+      }
+
+      .noise {
+        position: fixed;
+        inset: -50px;
+        background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 160 160' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='noStitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.22' /%3E%3C/svg%3E");
+        opacity: 0.18;
+        mix-blend-mode: soft-light;
+        pointer-events: none;
+        z-index: 3;
+        animation: drift 9s linear infinite alternate;
+      }
+
+      @keyframes drift {
+        from {
+          transform: translate3d(-10px, -10px, 0);
+        }
+        to {
+          transform: translate3d(10px, 10px, 0);
+        }
+      }
+
+      .frame {
+        position: relative;
+        width: min(900px, 96vw);
+        height: min(540px, 70vh);
+        border-radius: 18px;
+        padding: 18px 18px 20px;
+        background: radial-gradient(
+            circle at top left,
+            rgba(16, 185, 129, 0.12),
+            transparent 60%
+          ),
+          radial-gradient(
+            circle at bottom right,
+            rgba(248, 250, 252, 0.06),
+            transparent 55%
+          ),
+          #020617;
+        box-shadow:
+          0 0 40px rgba(22, 163, 74, 0.35),
+          0 0 140px rgba(15, 23, 42, 0.95);
+        border: 1px solid rgba(15, 23, 42, 0.9);
+        overflow: hidden;
+      }
+
+      .frame::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        border-radius: inherit;
+        border: 1px solid rgba(55, 65, 81, 0.9);
+        mix-blend-mode: screen;
+        pointer-events: none;
+      }
+
+      .top-bar {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.14em;
+        color: #9ca3af;
+        margin-bottom: 10px;
+      }
+
+      .lights {
+        display: flex;
+        gap: 6px;
+      }
+
+      .light {
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        box-shadow: 0 0 9px currentColor;
+      }
+
+      .light--on {
+        color: #22c55e;
+      }
+
+      .light--warn {
+        color: #facc15;
+        opacity: 0.0;
+        animation: blink 1.6s steps(2, jump-none) infinite;
+      }
+
+      .light--err {
+        color: #ef4444;
+        opacity: 0.0;
+        animation: blink 1s steps(2, jump-none) infinite;
+      }
+
+      @keyframes blink {
+        0% {
+          opacity: 0;
+        }
+        50% {
+          opacity: 1;
+        }
+        100% {
+          opacity: 0;
+        }
+      }
+
+      .label {
+        margin-left: auto;
+        padding: 3px 8px;
+        border-radius: 999px;
+        border: 1px solid rgba(148, 163, 184, 0.7);
+        font-size: 10px;
+        color: #9ca3af;
+        background: rgba(15, 23, 42, 0.9);
+      }
+
+      .window {
+        position: relative;
+        height: calc(100% - 26px);
+        border-radius: 12px;
+        border: 1px solid rgba(31, 41, 55, 0.9);
+        background: radial-gradient(
+            circle at top left,
+            rgba(16, 185, 129, 0.2),
+            transparent 55%
+          ),
+          linear-gradient(to bottom right, #020617, #020617 55%, #020617 100%);
+        box-shadow: inset 0 0 40px rgba(0, 0, 0, 0.9);
+        padding: 12px 14px;
+        display: grid;
+        grid-template-columns: 240px minmax(0, 1fr);
+        gap: 12px;
+        color: var(--accent);
+      }
+
+      @media (max-width: 720px) {
+        .window {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      .sidebar {
+        border-right: 1px solid rgba(15, 23, 42, 0.9);
+        padding-right: 12px;
+      }
+
+      @media (max-width: 720px) {
+        .sidebar {
+          border-right: none;
+          border-bottom: 1px solid rgba(15, 23, 42, 0.9);
+          padding-bottom: 10px;
+        }
+      }
+
+      .sidebar-title {
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.16em;
+        color: #6b7280;
+        margin-bottom: 5px;
+      }
+
+      .status-line {
+        font-size: 11px;
+        color: var(--accent);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 4px;
+      }
+
+      .status-pill {
+        border-radius: 999px;
+        border: 1px solid var(--accent-soft);
+        padding: 2px 6px;
+        font-size: 10px;
+        color: var(--accent);
+        background: rgba(15, 23, 42, 0.95);
+      }
+
+      .meta {
+        font-size: 10px;
+        color: var(--text-dim);
+        margin-top: 6px;
+        line-height: 1.5;
+      }
+
+      .meta span {
+        display: block;
+      }
+
+      .meta-key {
+        color: #6b7280;
+      }
+
+      .divider {
+        margin: 10px 0 8px;
+        height: 1px;
+        background: linear-gradient(
+          to right,
+          transparent,
+          rgba(31, 41, 55, 0.9),
+          transparent
+        );
+      }
+
+      .log {
+        font-size: 11px;
+        color: var(--accent);
+        max-height: 150px;
+        overflow: hidden;
+        mask-image: linear-gradient(to bottom, black 65%, transparent);
+      }
+
+      .log-line {
+        white-space: nowrap;
+      }
+
+      .log-tag {
+        color: #4b5563;
+        margin-right: 4px;
+      }
+
+      .log-warn {
+        color: var(--danger);
+      }
+
+      .terminal {
+        position: relative;
+        padding-left: 6px;
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+      }
+
+      .terminal-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        font-size: 11px;
+        color: #6b7280;
+        margin-bottom: 6px;
+      }
+
+      .terminal-body {
+        flex: 1;
+        overflow: hidden;
+        font-size: 12px;
+        line-height: 1.5;
+        color: #22c55e;
+      }
+
+      .line {
+        white-space: pre-wrap;
+        word-break: break-word;
+      }
+
+      .prompt-line {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        margin-top: 4px;
+      }
+
+      .prompt-symbol {
+        color: var(--accent);
+      }
+
+      .prompt-input {
+        flex: 1;
+        background: transparent;
+        border: none;
+        outline: none;
+        color: #e5e7eb;
+        font: inherit;
+      }
+
+      .prompt-input::placeholder {
+        color: rgba(148, 163, 184, 0.4);
+      }
+
+      .cursor {
+        display: inline-block;
+        width: 8px;
+        height: 14px;
+        margin-left: 2px;
+        background: #22c55e;
+        box-shadow: 0 0 6px rgba(34, 197, 94, 0.8);
+        animation: cursor-blink 1s steps(1, end) infinite;
+      }
+
+      @keyframes cursor-blink {
+        0%,
+        49% {
+          opacity: 1;
+        }
+        50%,
+        100% {
+          opacity: 0;
+        }
+      }
+
+      .warning {
+        font-size: 11px;
+        color: var(--danger);
+        margin-top: 6px;
+        opacity: 0;
+        transform: translateY(4px);
+        transition: opacity 0.4s ease, transform 0.4s ease;
+      }
+
+      .warning.visible {
+        opacity: 1;
+        transform: translateY(0);
+      }
+
+      .overlay {
+        position: absolute;
+        inset: 0;
+        background: radial-gradient(circle at center, #020617 0, #000 65%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+        text-align: center;
+        z-index: 4;
+        opacity: 0;
+        visibility: hidden;
+        transition: opacity 0.7s ease-in-out, visibility 0.7s ease-in-out;
+      }
+
+      .overlay.visible {
+        opacity: 1;
+        visibility: visible;
+      }
+
+      .overlay-title {
+        font-size: 14px;
+        letter-spacing: 0.38em;
+        text-transform: uppercase;
+        color: #6b7280;
+        margin-bottom: 14px;
+      }
+
+      .overlay-main {
+        font-size: 20px;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        color: #f9fafb;
+        margin-bottom: 8px;
+      }
+
+      .overlay-sub {
+        font-size: 11px;
+        max-width: 340px;
+        color: #6b7280;
+      }
+
+      .glitch {
+        position: relative;
+      }
+
+      .glitch::before,
+      .glitch::after {
+        content: attr(data-text);
+        position: absolute;
+        inset: 0;
+        mix-blend-mode: screen;
+        opacity: 0.75;
+        clip-path: polygon(0 0, 100% 0, 100% 65%, 0 65%);
+      }
+
+      .glitch::before {
+        left: -1px;
+        text-shadow: -2px 0 #22c55e;
+        animation: glitch-1 1.8s infinite linear alternate-reverse;
+      }
+
+      .glitch::after {
+        left: 1px;
+        text-shadow: 2px 0 #f97316;
+        animation: glitch-2 2.2s infinite linear alternate-reverse;
+      }
+
+      @keyframes glitch-1 {
+        0% {
+          clip-path: polygon(0 2%, 100% 2%, 100% 24%, 0 24%);
+        }
+        50% {
+          clip-path: polygon(0 40%, 100% 40%, 100% 58%, 0 58%);
+        }
+        100% {
+          clip-path: polygon(0 70%, 100% 70%, 100% 96%, 0 96%);
+        }
+      }
+
+      @keyframes glitch-2 {
+        0% {
+          clip-path: polygon(0 8%, 100% 8%, 100% 30%, 0 30%);
+        }
+        50% {
+          clip-path: polygon(0 46%, 100% 46%, 100% 64%, 0 64%);
+        }
+        100% {
+          clip-path: polygon(0 78%, 100% 78%, 100% 100%, 0 100%);
+        }
+      }
+    </style>
+  </head>
+  <body class="scanlines">
+    <div class="noise"></div>
+    <div class="frame">
+      <div class="top-bar">
+        <div class="lights">
+          <span class="light light--on"></span>
+          <span class="light light--warn"></span>
+          <span class="light light--err"></span>
+        </div>
+        <span>ACCESS NODE // 0x1F3F</span>
+        <span class="label">UNAUTHORISED INTERFACE</span>
+      </div>
+
+      <div class="window">
+        <aside class="sidebar">
+          <div class="sidebar-title">SESSION STATUS</div>
+          <div class="status-line">
+            <span>link.integrity()</span>
+            <span class="status-pill" id="status-pill">UNVERIFIED</span>
+          </div>
+          <div class="meta">
+            <span><span class="meta-key">origin:</span> external / masked</span>
+            <span><span class="meta-key">node:</span> ///delta-07.shadow</span>
+            <span><span class="meta-key">trace:</span> drifting / unstable</span>
+          </div>
+
+          <div class="divider"></div>
+
+          <div class="sidebar-title">EVENT LOG</div>
+          <div class="log" id="log">
+            <div class="log-line">
+              <span class="log-tag">[00:00:01]</span> route /public/entry loaded
+            </div>
+            <div class="log-line">
+              <span class="log-tag">[00:00:03]</span> passive scan detected
+            </div>
+            <div class="log-line log-warn">
+              <span class="log-tag">[00:00:04]</span> unknown client fingerprint
+            </div>
+          </div>
+        </aside>
+
+        <section class="terminal">
+          <div class="terminal-header">
+            <span>// secure shell // ghost:~</span>
+            <span>CTRL+C to abort trace</span>
+          </div>
+
+          <div class="terminal-body" id="terminal">
+            <div class="line">booting interface... done</div>
+            <div class="line">handshake: passive &lt;observer&gt; detected</div>
+            <div class="line">hint: credentials were never meant for you.</div>
+            <div class="line" id="type-target"></div>
+
+            <div class="prompt-line">
+              <span class="prompt-symbol">guest@ghost:~$</span>
+              <input
+                id="prompt"
+                class="prompt-input"
+                type="text"
+                autocomplete="off"
+                spellcheck="false"
+                placeholder="type: login"
+              />
+              <span class="cursor"></span>
+            </div>
+
+            <div class="warning" id="warning">
+              ACCESS DENIED // pattern recognised // it watched you type.
+            </div>
+          </div>
+        </section>
+
+        <div class="overlay" id="overlay">
+          <div class="overlay-title">connection accepted</div>
+          <div class="overlay-main glitch" data-text="WELCOME BACK">
+            WELCOME BACK
+          </div>
+          <div class="overlay-sub">
+            you failed the test. persistent curiosity flag: <br />true // it
+            remembers this device.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      // VERY small inline script to drive the "ARG" behavior.
+      (function () {
+        const logEl = document.getElementById("log");
+        const terminalEl = document.getElementById("terminal");
+        const prompt = document.getElementById("prompt");
+        const warning = document.getElementById("warning");
+        const overlay = document.getElementById("overlay");
+        const statusPill = document.getElementById("status-pill");
+        const typeTarget = document.getElementById("type-target");
+
+        const secret = "login";
+        let attempts = 0;
+
+        const scripted = [
+          "you are not supposed to see this.",
+          "still, you stayed.",
+          "it predicted that.",
+        ];
+
+        let scriptIndex = 0;
+
+        function appendLog(text, warn) {
+          const line = document.createElement("div");
+          line.className = "log-line" + (warn ? " log-warn" : "");
+          const tag = document.createElement("span");
+          tag.className = "log-tag";
+          const now = new Date();
+          const t =
+            now.getHours().toString().padStart(2, "0") +
+            ":" +
+            now.getMinutes().toString().padStart(2, "0") +
+            ":" +
+            now.getSeconds().toString().padStart(2, "0");
+          tag.textContent = "[" + t + "]";
+          line.appendChild(tag);
+          line.appendChild(document.createTextNode(" " + text));
+          logEl.appendChild(line);
+          logEl.scrollTop = logEl.scrollHeight;
+        }
+
+        function appendTerminalLine(text) {
+          const line = document.createElement("div");
+          line.className = "line";
+          line.textContent = text;
+          terminalEl.insertBefore(
+            line,
+            terminalEl.querySelector(".prompt-line")
+          );
+        }
+
+        function typeOutNext() {
+          if (scriptIndex >= scripted.length) return;
+          const text = scripted[scriptIndex++];
+          let i = 0;
+          typeTarget.textContent = "";
+          const id = setInterval(() => {
+            typeTarget.textContent = text.slice(0, i++);
+            if (i > text.length) {
+              clearInterval(id);
+              setTimeout(typeOutNext, 2200);
+            }
+          }, 35);
+        }
+
+        typeOutNext();
+
+        function revealOverlay() {
+          overlay.classList.add("visible");
+          statusPill.textContent = "BOUND";
+          statusPill.style.borderColor = "rgba(248,113,113,0.6)";
+          statusPill.style.color = "#f97316";
+          appendLog("session sealed to this device", true);
+        }
+
+        function handleCommand(cmd) {
+          const trimmed = cmd.trim().toLowerCase();
+          attempts++;
+
+          appendTerminalLine("guest@ghost:~$ " + cmd);
+
+          if (trimmed === secret && attempts === 1) {
+            appendTerminalLine("accepted. it knew you would try.");
+            appendTerminalLine("final check: confirming match...");
+            appendLog("pattern match achieved // opening door", true);
+            setTimeout(revealOverlay, 1100);
+          } else if (trimmed === secret) {
+            appendTerminalLine("too late. first answer was recorded.");
+            appendTerminalLine("it only trusts the version of you that hesitates.");
+            appendLog("credential replay ignored", true);
+            warning.classList.add("visible");
+          } else if (!trimmed) {
+            appendTerminalLine("(nothing.)");
+          } else if (trimmed === "help") {
+            appendTerminalLine("available: login, exit, forget");
+          } else if (trimmed === "exit") {
+            appendTerminalLine("you already tried leaving.");
+            appendLog("client requested exit // denied", true);
+            warning.classList.add("visible");
+          } else if (trimmed === "forget") {
+            appendTerminalLine(
+              "forget() -> false;  // that was never an option."
+            );
+            appendLog("client requested deletion // archived instead", true);
+            warning.classList.add("visible");
+          } else {
+            appendTerminalLine("command not recognised, but remembered.");
+            appendLog("unregistered input captured: \"" + trimmed + '"', true);
+            warning.classList.add("visible");
+          }
+        }
+
+        prompt.addEventListener("keydown", function (e) {
+          if (e.key === "Enter") {
+            e.preventDefault();
+            const value = prompt.value;
+            prompt.value = "";
+            handleCommand(value);
+          }
+        });
+
+        window.addEventListener("load", function () {
+          prompt.focus();
+        });
+      })();
+    </script>
+  </body>
+</html>
+
